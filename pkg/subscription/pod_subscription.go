@@ -24,9 +24,13 @@ func(p *PodSubscription) Reconcile(object runtime.Object, event watch.EventType)
 
 	switch event {
 	case watch.Added:
-		if _, ok := pod.Annotations["type"]; !ok {
+		if _, ok := pod.Labels["type"]; !ok {
 			updatedPod := pod.DeepCopy()
-			updatedPod.Annotations["type"] = "sre"
+			if updatedPod.Labels == nil {
+				klog.Infof("Pod %v doesn't have labels, skipping", updatedPod.Name)
+				break
+			}
+			updatedPod.Labels["type"] = "sre"
 			// Update the pod
 			_, err := p.ClientSet.CoreV1().Pods(pod.Namespace).Update(p.Ctx,updatedPod, metav1.UpdateOptions{})
 			if err != nil {
@@ -37,7 +41,7 @@ func(p *PodSubscription) Reconcile(object runtime.Object, event watch.EventType)
 	case watch.Deleted:
 	case watch.Modified:
 
-		if pod.Annotations["type"] == "sre" {
+		if pod.Labels["type"] == "sre" {
 			klog.Info("This could be some custom behaviour beyond just a CRUD")
 		}
 
