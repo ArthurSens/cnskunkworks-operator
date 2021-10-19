@@ -23,7 +23,7 @@ func RunLoop(subscriptions []subscription.ISubscription) error {
 				select {
 				case msg := <-wiface.ResultChan():
 					subscription.Reconcile(msg.Object, msg.Type)
-				case isComplete := <- subscription.IsComplete():
+				case isComplete := <-subscription.IsComplete():
 					if isComplete {
 						wg.Done()
 					}

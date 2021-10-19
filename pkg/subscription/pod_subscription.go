@@ -2,6 +2,7 @@ package subscription
 
 import (
 	"context"
+
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -12,12 +13,12 @@ import (
 
 type PodSubscription struct {
 	watcherInterface watch.Interface
-	ClientSet kubernetes.Interface
-	Ctx context.Context
-	Completion chan bool
+	ClientSet        kubernetes.Interface
+	Ctx              context.Context
+	Completion       chan bool
 }
 
-func(p *PodSubscription) Reconcile(object runtime.Object, event watch.EventType) {
+func (p *PodSubscription) Reconcile(object runtime.Object, event watch.EventType) {
 
 	pod := object.(*v1.Pod)
 	klog.Infof("PodSubscription event type %s for %s", event, pod.Name)
@@ -32,7 +33,7 @@ func(p *PodSubscription) Reconcile(object runtime.Object, event watch.EventType)
 			}
 			updatedPod.Labels["type"] = "sre"
 			// Update the pod
-			_, err := p.ClientSet.CoreV1().Pods(pod.Namespace).Update(p.Ctx,updatedPod, metav1.UpdateOptions{})
+			_, err := p.ClientSet.CoreV1().Pods(pod.Namespace).Update(p.Ctx, updatedPod, metav1.UpdateOptions{})
 			if err != nil {
 				klog.Error(err)
 			}

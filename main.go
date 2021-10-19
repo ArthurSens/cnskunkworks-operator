@@ -24,16 +24,17 @@ package main
 import (
 	"context"
 	"flag"
+	"log"
+	"math/rand"
+	"net/http"
+	"time"
+
 	"github.com/cloud-native-skunkworks/cnskunkworks-operator/pkg/runtime"
 	"github.com/cloud-native-skunkworks/cnskunkworks-operator/pkg/subscription"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
-	"log"
-	"math/rand"
-	"net/http"
-	"time"
 )
 
 var (
@@ -71,13 +72,20 @@ func main() {
 	// Context
 	context := context.TODO()
 
-	if err := runtime.RunLoop([]subscription.ISubscription{
-		&subscription.PodSubscription{
-			ClientSet: defaultKubernetesClientSet,
-			Ctx: context,
-			Completion: make(chan bool),
+	if err := runtime.RunLoop(
+		[]subscription.ISubscription{
+			// &subscription.PodSubscription{
+			// 	ClientSet:  defaultKubernetesClientSet,
+			// 	Ctx:        context,
+			// 	Completion: make(chan bool),
+			// },
+			&subscription.NamespaceSubscription{
+				ClientSet:  defaultKubernetesClientSet,
+				Ctx:        context,
+				Completion: make(chan bool),
+			},
 		},
-	}); err != nil {
+	); err != nil {
 		klog.Fatalf(err.Error())
 	}
 }
